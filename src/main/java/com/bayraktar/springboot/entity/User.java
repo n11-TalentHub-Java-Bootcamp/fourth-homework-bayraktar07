@@ -22,5 +22,4 @@ public class User implements BaseEntity{
     private String phoneNumber;
     @Column(length = 30, nullable = false)
     private String email;
-
 }

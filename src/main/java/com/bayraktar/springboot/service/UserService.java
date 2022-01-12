@@ -1,6 +1,6 @@
 package com.bayraktar.springboot.service;
 
-import com.bayraktar.springboot.converter.UserConverter;
+import com.bayraktar.springboot.converter.UserMapper;
 import com.bayraktar.springboot.dto.UserDTO;
 import com.bayraktar.springboot.entity.User;
 import com.bayraktar.springboot.exception.NotFoundException;
@@ -20,22 +20,22 @@ public class UserService {
     private final UserEntityService userEntityService;
 
     public List<UserDTO> findAll() {
-        return UserConverter.INSTANCE.convertAllUserListToUserDTOList(userEntityService.findAll());
+        return UserMapper.INSTANCE.convertAllUserListToUserDTOList(userEntityService.findAll());
     }
 
     public UserDTO findByName(String name) {
         Optional<User> optionalUser = userEntityService.findByName(name);
-        return UserConverter.INSTANCE.convertUserToUserDTO(doesUserExist(optionalUser));
+        return UserMapper.INSTANCE.convertUserToUserDTO(doesUserExist(optionalUser));
     }
 
     public UserDTO findById(Long id) {
         Optional<User> optionalUser = userEntityService.findById(id);
-        return UserConverter.INSTANCE.convertUserToUserDTO(doesUserExist(optionalUser));
+        return UserMapper.INSTANCE.convertUserToUserDTO(doesUserExist(optionalUser));
     }
 
     public UserDTO save(UserDTO userDTO) {
-        userEntityService.save(UserConverter.INSTANCE.convertUserDTOToUser(userDTO));
-        return userDTO;
+        User user = userEntityService.save(UserMapper.INSTANCE.convertUserDTOToUser(userDTO));
+        return UserMapper.INSTANCE.convertUserToUserDTO(user);
     }
 
     public void deleteById(Long id) {
