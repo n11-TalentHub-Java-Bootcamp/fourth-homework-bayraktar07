@@ -5,6 +5,8 @@ import com.bayraktar.springboot.entity.Collection;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
+import java.util.List;
+
 @Mapper
 public interface CollectionMapper {
 
@@ -13,4 +15,6 @@ public interface CollectionMapper {
     CollectionDTO convertCollectionToCollectionDTO(Collection collection);
 
     Collection convertCollectionDTOToCollection(CollectionDTO collectionDTO);
+
+    List<CollectionDTO> convertCollectionListToCollectionListDTO(List<Collection> collectionList);
 }

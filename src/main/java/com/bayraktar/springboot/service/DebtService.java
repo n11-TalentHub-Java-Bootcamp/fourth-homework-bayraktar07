@@ -87,10 +87,10 @@ public class DebtService {
             if(d.getExpiryDate().isBefore(interestDate)) {
                 long days1 = ChronoUnit.DAYS.between(d.getExpiryDate(), interestDate);
                 long days2 = ChronoUnit.DAYS.between(d.getExpiryDate(), LocalDate.now());
-                totalInterest += (days1 * (interestRate1_5 / 30)) + (days2 * (interestRate2 / 30));
+                totalInterest += (days1 * (interestRate1_5 / 3000)) + (days2 * (interestRate2 / 3000));
             } else {
                 long days = ChronoUnit.DAYS.between(d.getExpiryDate(), LocalDate.now());
-                totalInterest += days * (interestRate2 / 30);
+                totalInterest += days * (interestRate2 / 3000);
             }
         }
         if(totalInterest == 0) {
@@ -106,10 +106,10 @@ public class DebtService {
             if(debtDTO.getExpiryDate().isBefore(interestDate)) {
                 long days1 = ChronoUnit.DAYS.between(debtDTO.getExpiryDate(), interestDate);
                 long days2 = ChronoUnit.DAYS.between(debtDTO.getExpiryDate(), LocalDate.now());
-                totalInterest += (days1 * (interestRate1_5 / 30)) + (days2 * (interestRate2 / 30));
+                totalInterest += (days1 * (interestRate1_5 / 3000)) + (days2 * (interestRate2 / 3000));
             } else {
                 long days = ChronoUnit.DAYS.between(debtDTO.getExpiryDate(), LocalDate.now());
-                totalInterest += days * (interestRate2 / 30);
+                totalInterest += days * (interestRate2 / 3000);
             }
             if(totalInterest == 0) {
                 totalInterest++;

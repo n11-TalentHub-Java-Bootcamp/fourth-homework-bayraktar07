@@ -39,18 +39,18 @@ public class DebtController {
     }
 
     @GetMapping("/users/total-debt-sum/{userId}")
-    public Long findTotalDebtSumByUserId(@PathVariable Long userId) {
-        return debtService.findTotalDebtSumByUserId(userId);
+    public ResponseEntity<Long> findTotalDebtSumByUserId(@PathVariable Long userId) {
+        return ResponseEntity.ok(debtService.findTotalDebtSumByUserId(userId));
     }
 
     @GetMapping("/users/overdue-sums/{userId}")
-    public Long findOverdueDebtSumByUserId(@PathVariable Long userId) {
-        return debtService.findOverdueDebtSumByUserId(userId);
+    public ResponseEntity<Long> findOverdueDebtSumByUserId(@PathVariable Long userId) {
+        return ResponseEntity.ok(debtService.findOverdueDebtSumByUserId(userId));
     }
 
     @GetMapping("users/overdue-interest-sum/{id}")
-    public Long findOverdueDebtInterestSum(@PathVariable Long id) {
-        return debtService.findAllOverdueInterestSumByUserId(id);
+    public ResponseEntity<Long> findOverdueDebtInterestSum(@PathVariable Long id) {
+        return ResponseEntity.ok(debtService.findAllOverdueInterestSumByUserId(id));
     }
 
     @PostMapping
