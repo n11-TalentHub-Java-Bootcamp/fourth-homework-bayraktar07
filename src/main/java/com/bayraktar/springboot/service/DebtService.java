@@ -27,10 +27,16 @@ public class DebtService {
     private static final double interestRate1_5 = 1.5;
     private static final double interestRate2 = 2;
 
-    public DebtDTO saveDebt(DebtDTO debtDTO) {
+    public DebtDTO saveNormalDebt(DebtDTO debtDTO) {
         Debt debt = debtConverter.debtUserMatcher(debtDTO);
         debt.setDebtType(DebtType.NORMAL);
          debt = debtEntityService.save(debt);
+        return DebtMapper.INSTANCE.convertDebtToDebtDTO(debt);
+    }
+
+    public DebtDTO saveDebt(DebtDTO debtDTO) {
+        Debt debt = debtConverter.debtUserMatcher(debtDTO);
+        debt = debtEntityService.save(debt);
         return DebtMapper.INSTANCE.convertDebtToDebtDTO(debt);
     }
 
@@ -82,39 +88,41 @@ public class DebtService {
 
     public Long findAllOverdueInterestSumByUserId (Long userId) {
         List<DebtDTO> debtDTOS = findAllOverdueDebtListByUserId(userId);
-        long totalInterest = 0L;
+        Double totalInterest = 0D;
         for(DebtDTO d : debtDTOS) {
+            long totalAmount = d.getTotalDebtAmount();
             if(d.getExpiryDate().isBefore(interestDate)) {
                 long days1 = ChronoUnit.DAYS.between(d.getExpiryDate(), interestDate);
                 long days2 = ChronoUnit.DAYS.between(d.getExpiryDate(), LocalDate.now());
-                totalInterest += (days1 * (interestRate1_5 / 3000)) + (days2 * (interestRate2 / 3000));
+                totalInterest += ((days1 * interestRate2 * totalAmount) / 3000) + ((days2 * interestRate2 * totalAmount) / 3000);
             } else {
                 long days = ChronoUnit.DAYS.between(d.getExpiryDate(), LocalDate.now());
-                totalInterest += days * (interestRate2 / 3000);
+                totalInterest = (days * interestRate2 * totalAmount) / 3000;
             }
         }
         if(totalInterest == 0) {
             totalInterest++;
         }
-        return totalInterest;
+        return Math.round(totalInterest);
     }
 
     public Long findOverdueInterestByDebtId (Long debtId) {
         DebtDTO debtDTO = findDebtById(debtId);
-        long totalInterest = 0L;
-        if(debtDTO.getExpiryDate().isAfter(LocalDate.now())) {
+        Long totalAmount = debtDTO.getTotalDebtAmount();
+        Double totalInterest = 0.0;
+        if(debtDTO.getExpiryDate().isBefore(LocalDate.now()) && totalAmount > 0) {
             if(debtDTO.getExpiryDate().isBefore(interestDate)) {
                 long days1 = ChronoUnit.DAYS.between(debtDTO.getExpiryDate(), interestDate);
                 long days2 = ChronoUnit.DAYS.between(debtDTO.getExpiryDate(), LocalDate.now());
-                totalInterest += (days1 * (interestRate1_5 / 3000)) + (days2 * (interestRate2 / 3000));
+                totalInterest += ((days1 * interestRate2 * totalAmount) / 3000) + ((days2 * interestRate2 * totalAmount) / 3000);
             } else {
                 long days = ChronoUnit.DAYS.between(debtDTO.getExpiryDate(), LocalDate.now());
-                totalInterest += days * (interestRate2 / 3000);
+                totalInterest = (days * interestRate2 * totalAmount) / 3000;
             }
             if(totalInterest == 0) {
                 totalInterest++;
             }
         }
-        return totalInterest;
+        return Math.round(totalInterest);
     }
 }

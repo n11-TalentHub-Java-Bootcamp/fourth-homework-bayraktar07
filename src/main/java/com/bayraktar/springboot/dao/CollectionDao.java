@@ -21,7 +21,7 @@ public interface CollectionDao extends JpaRepository<Collection, Long> {
             " SUM(debt.mainDebtAmount) FROM Debt debt " +
             "WHERE debt.user.id = :id " +
             "AND " +
-            "debt.debtType = DebtType.INTEREST")
+            "debt.debtType = com.bayraktar.springboot.enums.DebtType.INTEREST")
     Long findAllInterestSumByUserId(Long id);
 
 }

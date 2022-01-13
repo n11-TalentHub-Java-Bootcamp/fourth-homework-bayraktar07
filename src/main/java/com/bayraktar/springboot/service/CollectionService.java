@@ -1,8 +1,10 @@
 package com.bayraktar.springboot.service;
 
 import com.bayraktar.springboot.converter.CollectionMapper;
+import com.bayraktar.springboot.converter.DebtMapper;
 import com.bayraktar.springboot.dto.CollectionDTO;
 import com.bayraktar.springboot.dto.DebtDTO;
+import com.bayraktar.springboot.entity.Debt;
 import com.bayraktar.springboot.enums.DebtType;
 import com.bayraktar.springboot.service.entityservice.CollectionEntityService;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ public class CollectionService {
         if(interest > 0L) {
             debtService.saveDebt(saveInterestDebt(interest, debtDTO));
         }
+        debtService.saveDebt(debtDTO);
         return saveCollection(debtDTO.getMainDebtAmount()+interest,LocalDate.now(), debtId, debtDTO.getUserId());
     }
 
@@ -43,17 +46,16 @@ public class CollectionService {
     }
 
     private DebtDTO saveInterestDebt(Long amount, DebtDTO debtDTO) {
+        Debt boundDebt = DebtMapper.INSTANCE.convertDebtDTOToDebt(debtDTO);
 
-        DebtDTO debtDTO1 =
-                new DebtDTO(null,
-                amount,
-                0L,
-                LocalDate.now().plusYears(1),
-                LocalDate.now(),
-                debtDTO.getDebt(),
-                DebtType.INTEREST,
-                debtDTO.getUserId());
-        return debtService.saveDebt(debtDTO);
+        return new DebtDTO(null,
+        amount,
+        0L,
+        null,
+        LocalDate.now(),
+        boundDebt,
+        DebtType.INTEREST,
+        debtDTO.getUserId());
     }
 
     private CollectionDTO saveCollection (Long collectedAmount, LocalDate collectionDate, Long debtId, Long userId) {

@@ -22,8 +22,11 @@ public class Debt implements BaseEntity{
     private Long totalDebtAmount;
     private LocalDate expiryDate;
     private LocalDate registrationDate;
-    private Long boundDebtId;
+    @ManyToOne
+    @JoinColumn(name = "bound_debt_id", foreignKey = @ForeignKey(name = "BOUND_DEBT_FK"))
+    private Debt boundDebt;
     private DebtType debtType;
+
     @ManyToOne
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "DEBT_USER_FK"))
     private User user;

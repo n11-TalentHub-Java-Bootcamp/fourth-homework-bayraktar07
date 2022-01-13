@@ -16,7 +16,7 @@ public class DebtDTO {
     private Long totalDebtAmount;
     private LocalDate expiryDate;
     private LocalDate registrationDate;
-    private Debt debt;
+    private Debt boundDebt;
     private DebtType debtType;
     private Long userId;
 }

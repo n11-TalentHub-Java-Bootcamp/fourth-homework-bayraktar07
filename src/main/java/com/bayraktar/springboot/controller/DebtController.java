@@ -12,13 +12,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/debts/")
+@RequestMapping("/api/debts")
 @RequiredArgsConstructor
 public class DebtController {
 
     private final DebtService debtService;
 
-    @GetMapping
+    @GetMapping("/")
     public List<DebtDTO> findAllDebts() {
         return debtService.findAll();
     }
@@ -43,19 +43,19 @@ public class DebtController {
         return ResponseEntity.ok(debtService.findTotalDebtSumByUserId(userId));
     }
 
-    @GetMapping("/users/overdue-sums/{userId}")
+    @GetMapping("/users/overdue-debt-sums/{userId}")
     public ResponseEntity<Long> findOverdueDebtSumByUserId(@PathVariable Long userId) {
         return ResponseEntity.ok(debtService.findOverdueDebtSumByUserId(userId));
     }
 
-    @GetMapping("users/overdue-interest-sum/{id}")
+    @GetMapping("/users/overdue-interest-sums/{id}")
     public ResponseEntity<Long> findOverdueDebtInterestSum(@PathVariable Long id) {
         return ResponseEntity.ok(debtService.findAllOverdueInterestSumByUserId(id));
     }
 
     @PostMapping
     public ResponseEntity<DebtDTO> saveDebt(@RequestBody DebtDTO debtDTO) {
-        return ResponseEntity.ok(debtService.saveDebt(debtDTO));
+        return ResponseEntity.ok(debtService.saveNormalDebt(debtDTO));
     }
 
     @PutMapping

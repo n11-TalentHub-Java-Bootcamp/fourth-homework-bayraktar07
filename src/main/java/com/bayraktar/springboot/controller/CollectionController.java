@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
@@ -22,8 +23,8 @@ public class CollectionController {
     }
 
     @GetMapping("/dates")
-    public List<CollectionDTO> getCollectionsBetweenDates(LocalDate startDate, LocalDate endDate) {
-        return collectionService.findCollectionsBetweenDates(startDate, endDate);
+    public List<CollectionDTO> getCollectionsBetweenDates(String startDate, String endDate) {
+        return collectionService.findCollectionsBetweenDates(LocalDate.parse(startDate, DateTimeFormatter.ISO_DATE),LocalDate.parse(endDate, DateTimeFormatter.ISO_DATE));
     }
 
     @GetMapping("/interests/{id}")
@@ -32,7 +33,7 @@ public class CollectionController {
     }
 
     @PostMapping
-    public ResponseEntity<CollectionDTO> collectDebt (@PathVariable Long id) {
+    public ResponseEntity<CollectionDTO> collectDebt (Long id) {
         return ResponseEntity.ok(collectionService.collectDebt(id));
     }
 }
