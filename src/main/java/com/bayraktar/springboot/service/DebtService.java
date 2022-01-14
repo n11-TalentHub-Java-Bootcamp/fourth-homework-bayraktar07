@@ -2,7 +2,8 @@ package com.bayraktar.springboot.service;
 
 import com.bayraktar.springboot.converter.DebtConverter;
 import com.bayraktar.springboot.converter.DebtMapper;
-import com.bayraktar.springboot.dto.DebtDTO;
+import com.bayraktar.springboot.dto.DebtGetDTO;
+import com.bayraktar.springboot.dto.DebtSetDTO;
 import com.bayraktar.springboot.entity.Debt;
 import com.bayraktar.springboot.enums.DebtType;
 import com.bayraktar.springboot.exception.DebtCollectedException;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -23,59 +23,83 @@ public class DebtService {
 
     private final DebtEntityService debtEntityService;
     private final DebtConverter debtConverter;
-    private static final LocalDate interestDate = LocalDate.of(2018, 1, 1);
-    private static final double interestRate1_5 = 1.5;
-    private static final double interestRate2 = 2;
 
-    public DebtDTO saveNormalDebt(DebtDTO debtDTO) {
-        Debt debt = debtConverter.debtUserMatcher(debtDTO);
+    public DebtSetDTO saveNormalDebt(DebtSetDTO debtSetDTO) {
+        Debt debt = DebtMapper.INSTANCE.convertDebtSetDTOToDebt(debtSetDTO);
         debt.setDebtType(DebtType.NORMAL);
          debt = debtEntityService.save(debt);
-        return DebtMapper.INSTANCE.convertDebtToDebtDTO(debt);
+         debt = debtConverter.debtMatcher(DebtMapper.INSTANCE.convertDebtToDebtSetDTO(debt));
+        return DebtMapper.INSTANCE.convertDebtToDebtSetDTO(debt);
     }
 
-    public DebtDTO saveDebt(DebtDTO debtDTO) {
-        Debt debt = debtConverter.debtUserMatcher(debtDTO);
-        debt = debtEntityService.save(debt);
-        return DebtMapper.INSTANCE.convertDebtToDebtDTO(debt);
+    public void saveDebt(DebtSetDTO debtSetDTO) {
+        Debt debt = debtConverter.debtMatcher(debtSetDTO);
+        debtEntityService.save(debt);
     }
 
-    public DebtDTO findDebtById(Long id) {
+    public DebtSetDTO findDebtById(Long id) {
         Debt debt = debtEntityService.findById(id).orElseThrow(() -> new NotFoundException("Debt id" + id + " not found"));
-        return DebtMapper.INSTANCE.convertDebtToDebtDTO(debt);
+        return DebtMapper.INSTANCE.convertDebtToDebtSetDTO(debt);
     }
 
-    public List<DebtDTO> findAllDebtListByUserId(Long id) {
-        return DebtMapper.INSTANCE.convertAllDebtListToDebtDTOList(debtEntityService.findAllDebtListByUserId(id));
+    public DebtGetDTO findDebtByIdWithInterest(Long id) {
+        Debt debt = debtEntityService.findById(id).orElseThrow(() -> new NotFoundException("Debt id" + id + " not found"));
+        DebtGetDTO debtGetDTO = DebtMapper.INSTANCE.convertDebtToDebtGetDTO(debt);
+        debtGetDTO.setInterest(findOverdueInterestByDebtId(id));
+        return debtGetDTO;
     }
 
-    public List<DebtDTO> findAllOverdueDebtListByUserId(Long id) {
-        return DebtMapper.INSTANCE.convertAllDebtListToDebtDTOList(debtEntityService.findAllOverdueDebtListByUserId(id));
+    public List<DebtGetDTO> findAllDebtListByUserId(Long id) {
+        List<Debt> allDebtListByUserId = debtEntityService.findAllDebtListByUserId(id);
+        List<DebtGetDTO> debtGetDTOS = DebtMapper.INSTANCE.convertAllDebtListToDebtGetDTOList(allDebtListByUserId);
+        for (DebtGetDTO debtGetDTO : debtGetDTOS) {
+            debtGetDTO.setInterest(findOverdueInterestByDebtId(debtGetDTO.getId()));
+        }
+        return debtGetDTOS;
     }
 
-    public List<DebtDTO> findDebtsByDates(LocalDate startDate, LocalDate endDate) {
-        return DebtMapper.INSTANCE.convertAllDebtListToDebtDTOList(debtEntityService.findAllDebtsBetweenDates(startDate, endDate));
+    public List<DebtGetDTO> findAllOverdueDebtListByUserId(Long id) {
+        List<Debt> allOverdueDebtListByUserId = debtEntityService.findAllOverdueDebtListByUserId(id);
+        List<DebtGetDTO> debtGetDTOS = DebtMapper.INSTANCE.convertAllDebtListToDebtGetDTOList(allOverdueDebtListByUserId);
+        for (DebtGetDTO debt : debtGetDTOS) {
+            debt.setInterest(findOverdueInterestByDebtId(debt.getId()));
+        }
+        return debtGetDTOS;
+    }
+
+    public List<DebtGetDTO> findDebtsByDates(LocalDate startDate, LocalDate endDate) {
+        List<Debt> allDebtsBetweenDates = debtEntityService.findAllDebtsBetweenDates(startDate, endDate);
+        List<DebtGetDTO> debtGetDTOS = DebtMapper.INSTANCE.convertAllDebtListToDebtGetDTOList(allDebtsBetweenDates);
+        for (DebtGetDTO allDebtsBetweenDate : debtGetDTOS) {
+            allDebtsBetweenDate.setInterest(findOverdueInterestByDebtId(allDebtsBetweenDate.getId()));
+        }
+        return debtGetDTOS;
     }
 
     public void deleteUncollectedDebt(Long id) {
-        DebtDTO debtDTO = findDebtById(id);
-        if(debtDTO.getMainDebtAmount().equals(debtDTO.getTotalDebtAmount())){
+        DebtSetDTO debtSetDTO = findDebtById(id);
+        if(debtSetDTO.getMainDebtAmount().equals(debtSetDTO.getTotalDebtAmount())){
             debtEntityService.deleteById(id);
             return;
         }
         throw new DebtCollectedException("Debt collected. It can not be deleted.");
     }
 
-    public DebtDTO updateDebt(DebtDTO debtDTO) {
-        if(debtDTO.getMainDebtAmount().equals(debtDTO.getTotalDebtAmount())) {
-            Debt debt = debtEntityService.save(debtConverter.debtUserMatcher(debtDTO));
-            return DebtMapper.INSTANCE.convertDebtToDebtDTO(debt);
+    public DebtSetDTO updateDebt(DebtSetDTO debtSetDTO) {
+        if(debtSetDTO.getMainDebtAmount().equals(debtSetDTO.getTotalDebtAmount())) {
+            Debt debt = debtEntityService.save(debtConverter.debtMatcher(debtSetDTO));
+            return DebtMapper.INSTANCE.convertDebtToDebtSetDTO(debt);
         }
         throw new DebtCollectedException("Debt collected. It can not be updated.");
     }
 
-    public List<DebtDTO> findAll() {
-        return DebtMapper.INSTANCE.convertAllDebtListToDebtDTOList(debtEntityService.findAll());
+    public List<DebtGetDTO> findAll() {
+        List<Debt> all = debtEntityService.findAll();
+        List<DebtGetDTO> debtGetDTOS = DebtMapper.INSTANCE.convertAllDebtListToDebtGetDTOList(all);
+        for (DebtGetDTO debt : debtGetDTOS) {
+            debt.setInterest(findOverdueInterestByDebtId(debt.getId()));
+        }
+        return debtGetDTOS;
     }
 
     public Long findTotalDebtSumByUserId(Long id) {
@@ -87,42 +111,15 @@ public class DebtService {
     }
 
     public Long findAllOverdueInterestSumByUserId (Long userId) {
-        List<DebtDTO> debtDTOS = findAllOverdueDebtListByUserId(userId);
-        Double totalInterest = 0D;
-        for(DebtDTO d : debtDTOS) {
-            long totalAmount = d.getTotalDebtAmount();
-            if(d.getExpiryDate().isBefore(interestDate)) {
-                long days1 = ChronoUnit.DAYS.between(d.getExpiryDate(), interestDate);
-                long days2 = ChronoUnit.DAYS.between(d.getExpiryDate(), LocalDate.now());
-                totalInterest += ((days1 * interestRate2 * totalAmount) / 3000) + ((days2 * interestRate2 * totalAmount) / 3000);
-            } else {
-                long days = ChronoUnit.DAYS.between(d.getExpiryDate(), LocalDate.now());
-                totalInterest = (days * interestRate2 * totalAmount) / 3000;
-            }
-        }
-        if(totalInterest == 0) {
-            totalInterest++;
+        List<DebtGetDTO> debtGetDTOS = findAllOverdueDebtListByUserId(userId);
+        double totalInterest = 0D;
+        for(DebtGetDTO d : debtGetDTOS) {
+            totalInterest += findOverdueInterestByDebtId(d.getId());
         }
         return Math.round(totalInterest);
     }
 
     public Long findOverdueInterestByDebtId (Long debtId) {
-        DebtDTO debtDTO = findDebtById(debtId);
-        Long totalAmount = debtDTO.getTotalDebtAmount();
-        Double totalInterest = 0.0;
-        if(debtDTO.getExpiryDate().isBefore(LocalDate.now()) && totalAmount > 0) {
-            if(debtDTO.getExpiryDate().isBefore(interestDate)) {
-                long days1 = ChronoUnit.DAYS.between(debtDTO.getExpiryDate(), interestDate);
-                long days2 = ChronoUnit.DAYS.between(debtDTO.getExpiryDate(), LocalDate.now());
-                totalInterest += ((days1 * interestRate2 * totalAmount) / 3000) + ((days2 * interestRate2 * totalAmount) / 3000);
-            } else {
-                long days = ChronoUnit.DAYS.between(debtDTO.getExpiryDate(), LocalDate.now());
-                totalInterest = (days * interestRate2 * totalAmount) / 3000;
-            }
-            if(totalInterest == 0) {
-                totalInterest++;
-            }
-        }
-        return Math.round(totalInterest);
+       return debtEntityService.findOverdueInterestByDebtId(debtId);
     }
 }

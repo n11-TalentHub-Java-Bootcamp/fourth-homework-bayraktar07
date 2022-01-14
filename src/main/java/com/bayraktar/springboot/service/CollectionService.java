@@ -3,7 +3,7 @@ package com.bayraktar.springboot.service;
 import com.bayraktar.springboot.converter.CollectionMapper;
 import com.bayraktar.springboot.converter.DebtMapper;
 import com.bayraktar.springboot.dto.CollectionDTO;
-import com.bayraktar.springboot.dto.DebtDTO;
+import com.bayraktar.springboot.dto.DebtSetDTO;
 import com.bayraktar.springboot.entity.Debt;
 import com.bayraktar.springboot.enums.DebtType;
 import com.bayraktar.springboot.service.entityservice.CollectionEntityService;
@@ -23,14 +23,14 @@ public class CollectionService {
     private final DebtService debtService;
 
     public CollectionDTO collectDebt (Long debtId) {
-        DebtDTO debtDTO = debtService.findDebtById(debtId);
+        DebtSetDTO debtSetDTO = debtService.findDebtById(debtId);
         Long interest = debtService.findOverdueInterestByDebtId(debtId);
-        debtDTO.setTotalDebtAmount(0L);
+        debtSetDTO.setTotalDebtAmount(0L);
         if(interest > 0L) {
-            debtService.saveDebt(saveInterestDebt(interest, debtDTO));
+            debtService.saveDebt(saveInterestDebt(interest, debtSetDTO));
         }
-        debtService.saveDebt(debtDTO);
-        return saveCollection(debtDTO.getMainDebtAmount()+interest,LocalDate.now(), debtId, debtDTO.getUserId());
+        debtService.saveDebt(debtSetDTO);
+        return saveCollection(debtSetDTO.getMainDebtAmount()+interest,LocalDate.now(), debtId, debtSetDTO.getUserId());
     }
 
     public List<CollectionDTO> findCollectionListByUserId(Long userId) {
@@ -45,17 +45,17 @@ public class CollectionService {
         return CollectionMapper.INSTANCE.convertCollectionListToCollectionListDTO(collectionEntityService.findCollectionsBetweenDates(startDate, endDate));
     }
 
-    private DebtDTO saveInterestDebt(Long amount, DebtDTO debtDTO) {
-        Debt boundDebt = DebtMapper.INSTANCE.convertDebtDTOToDebt(debtDTO);
+    private DebtSetDTO saveInterestDebt(Long amount, DebtSetDTO debtSetDTO) {
+        Debt boundDebt = DebtMapper.INSTANCE.convertDebtSetDTOToDebt(debtSetDTO);
 
-        return new DebtDTO(null,
+        return new DebtSetDTO(null,
         amount,
         0L,
         null,
         LocalDate.now(),
-        boundDebt,
+        boundDebt.getId(),
         DebtType.INTEREST,
-        debtDTO.getUserId());
+        debtSetDTO.getUserId());
     }
 
     private CollectionDTO saveCollection (Long collectedAmount, LocalDate collectionDate, Long debtId, Long userId) {

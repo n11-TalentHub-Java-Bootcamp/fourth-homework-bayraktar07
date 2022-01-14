@@ -22,7 +22,7 @@ public class Debt implements BaseEntity{
     private Long totalDebtAmount;
     private LocalDate expiryDate;
     private LocalDate registrationDate;
-    @ManyToOne
+    @OneToOne(orphanRemoval = true)
     @JoinColumn(name = "bound_debt_id", foreignKey = @ForeignKey(name = "BOUND_DEBT_FK"))
     private Debt boundDebt;
     private DebtType debtType;

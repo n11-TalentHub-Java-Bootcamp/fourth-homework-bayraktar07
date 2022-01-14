@@ -1,7 +1,8 @@
 package com.bayraktar.springboot.controller;
 
 
-import com.bayraktar.springboot.dto.DebtDTO;
+import com.bayraktar.springboot.dto.DebtGetDTO;
+import com.bayraktar.springboot.dto.DebtSetDTO;
 import com.bayraktar.springboot.service.DebtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,22 +20,22 @@ public class DebtController {
     private final DebtService debtService;
 
     @GetMapping("/")
-    public List<DebtDTO> findAllDebts() {
+    public List<DebtGetDTO> findAllDebts() {
         return debtService.findAll();
     }
 
     @GetMapping("/dates/")
-    public List<DebtDTO> findAllDebtsBetweenDates(String startDate, String endDate) {
+    public List<DebtGetDTO> findAllDebtsBetweenDates(String startDate, String endDate) {
         return debtService.findDebtsByDates(LocalDate.parse(startDate, DateTimeFormatter.ISO_LOCAL_DATE), LocalDate.parse(endDate, DateTimeFormatter.ISO_LOCAL_DATE));
     }
 
     @GetMapping("/users/{id}")
-    public List<DebtDTO> findAllDebtListByUserId(@PathVariable Long id) {
+    public List<DebtGetDTO> findAllDebtListByUserId(@PathVariable Long id) {
         return debtService.findAllDebtListByUserId(id);
     }
 
     @GetMapping("/users/overdue-debts/{id}")
-    public List<DebtDTO> findAllOverdueDebtListByUserId(@PathVariable Long id) {
+    public List<DebtGetDTO> findAllOverdueDebtListByUserId(@PathVariable Long id) {
         return debtService.findAllOverdueDebtListByUserId(id);
     }
 
@@ -54,13 +55,13 @@ public class DebtController {
     }
 
     @PostMapping
-    public ResponseEntity<DebtDTO> saveDebt(@RequestBody DebtDTO debtDTO) {
-        return ResponseEntity.ok(debtService.saveNormalDebt(debtDTO));
+    public ResponseEntity<DebtSetDTO> saveDebt(@RequestBody DebtSetDTO debtSetDTO) {
+        return ResponseEntity.ok(debtService.saveNormalDebt(debtSetDTO));
     }
 
     @PutMapping
-    public ResponseEntity<DebtDTO> updateDebt(@RequestBody DebtDTO debtDTO) {
-        return ResponseEntity.ok(debtService.updateDebt(debtDTO));
+    public ResponseEntity<DebtSetDTO> updateDebt(@RequestBody DebtSetDTO debtSetDTO) {
+        return ResponseEntity.ok(debtService.updateDebt(debtSetDTO));
     }
 
     @DeleteMapping
