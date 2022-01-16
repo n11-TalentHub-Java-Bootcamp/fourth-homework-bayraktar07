@@ -62,10 +62,10 @@ public class DebtEntityService extends BaseEntityService<Debt, DebtDao>{
             if(debt.getExpiryDate().isBefore(interestDate)) {
                 long days1 = ChronoUnit.DAYS.between(debt.getExpiryDate(), interestDate);
                 long days2 = ChronoUnit.DAYS.between(debt.getExpiryDate(), LocalDate.now());
-                totalInterest += ((days1 * interestRate1_5 * totalAmount) / 3000) + ((days2 * interestRate2 * totalAmount) / 3000);
+                totalInterest += ((days1 * interestRate1_5 * totalAmount) / 100) + ((days2 * interestRate2 * totalAmount) / 100);
             } else {
                 long days = ChronoUnit.DAYS.between(debt.getExpiryDate(), LocalDate.now());
-                totalInterest = (days * interestRate2 * totalAmount) / 3000;
+                totalInterest = (days * interestRate2 * totalAmount) / 100;
             }
             if(totalInterest == 0) {
                 totalInterest++;

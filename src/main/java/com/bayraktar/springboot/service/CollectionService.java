@@ -51,7 +51,7 @@ public class CollectionService {
         return new DebtSetDTO(null,
         amount,
         0L,
-        null,
+        LocalDate.now(),
         LocalDate.now(),
         boundDebt.getId(),
         DebtType.INTEREST,
