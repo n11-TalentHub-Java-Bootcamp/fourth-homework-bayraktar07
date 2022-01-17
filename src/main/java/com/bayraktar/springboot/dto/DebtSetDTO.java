@@ -11,8 +11,8 @@ import java.time.LocalDate;
 public class DebtSetDTO {
 
     private Long id;
-    private Long mainDebtAmount;
-    private Long totalDebtAmount;
+    private Double mainDebtAmount;
+    private Double totalDebtAmount;
     private LocalDate expiryDate;
     private LocalDate registrationDate;
     private Long boundDebtId;

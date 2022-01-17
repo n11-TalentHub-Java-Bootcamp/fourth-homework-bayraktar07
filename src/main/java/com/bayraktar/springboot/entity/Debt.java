@@ -1,6 +1,7 @@
 package com.bayraktar.springboot.entity;
 
 import com.bayraktar.springboot.enums.DebtType;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,6 +12,7 @@ import java.time.LocalDate;
 @Table(name = "DEBT")
 @Getter
 @Setter
+@JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class Debt implements BaseEntity{
 
     @Id
@@ -18,16 +20,16 @@ public class Debt implements BaseEntity{
     private Long id;
 
     @Column(updatable = false)
-    private Long mainDebtAmount;
-    private Long totalDebtAmount;
+    private Double mainDebtAmount;
+    private Double totalDebtAmount;
     private LocalDate expiryDate;
     private LocalDate registrationDate;
-    @OneToOne(orphanRemoval = true)
+    @OneToOne(orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "bound_debt_id", foreignKey = @ForeignKey(name = "BOUND_DEBT_FK"))
     private Debt boundDebt;
     private DebtType debtType;
 
-    @ManyToOne
+    @ManyToOne( fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "DEBT_USER_FK"))
     private User user;
 

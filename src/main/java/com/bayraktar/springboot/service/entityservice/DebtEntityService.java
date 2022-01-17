@@ -51,27 +51,27 @@ public class DebtEntityService extends BaseEntityService<Debt, DebtDao>{
         return debtSum;
     }
 
-    public Long findOverdueInterestByDebtId (Long debtId) {
+    public Double findOverdueInterestByDebtId (Long debtId) {
         Debt debt = findById(debtId).orElseThrow(() -> new NotFoundException("Debt id" + debtId + " not found"));
-        Long totalAmount = debt.getTotalDebtAmount();
+        Double totalAmount = debt.getTotalDebtAmount();
         double totalInterest = 0.0;
         if(debt.getDebtType()== DebtType.INTEREST) {
-            return 0L;
+            return 0D;
         }
         if(debt.getExpiryDate().isBefore(LocalDate.now()) && totalAmount > 0) {
             if(debt.getExpiryDate().isBefore(interestDate)) {
                 long days1 = ChronoUnit.DAYS.between(debt.getExpiryDate(), interestDate);
                 long days2 = ChronoUnit.DAYS.between(debt.getExpiryDate(), LocalDate.now());
-                totalInterest += ((days1 * interestRate1_5 * totalAmount) / 100) + ((days2 * interestRate2 * totalAmount) / 100);
+                totalInterest += ((days1 * interestRate1_5 * totalAmount) / 100D) + ((days2 * interestRate2 * totalAmount) / 100D);
             } else {
                 long days = ChronoUnit.DAYS.between(debt.getExpiryDate(), LocalDate.now());
-                totalInterest = (days * interestRate2 * totalAmount) / 100;
+                totalInterest = (days * interestRate2 * totalAmount) / 100D;
             }
             if(totalInterest == 0) {
                 totalInterest++;
             }
         }
-        return Math.round(totalInterest);
+        return totalInterest;
     }
 
 }

@@ -43,7 +43,8 @@ public class UserService {
     }
 
     public UserDTO update(UserDTO userDTO) {
-        return save(findById(userDTO.getId()));
+        findById(userDTO.getId());
+        return save(userDTO);
     }
 
     private User doesUserExist(Optional<User> optionalUser) {

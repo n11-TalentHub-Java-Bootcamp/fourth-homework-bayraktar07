@@ -119,7 +119,7 @@ public class DebtService {
         return Math.round(totalInterest);
     }
 
-    public Long findOverdueInterestByDebtId (Long debtId) {
+    public Double findOverdueInterestByDebtId (Long debtId) {
        return debtEntityService.findOverdueInterestByDebtId(debtId);
     }
 }

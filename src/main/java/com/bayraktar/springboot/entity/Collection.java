@@ -1,25 +1,30 @@
 package com.bayraktar.springboot.entity;
 
-import lombok.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.format.annotation.NumberFormat;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "COLLECTION")
 @Getter
 @Setter
+@JsonIgnoreProperties({"hibernateLazyInitializer"})
 public class Collection implements BaseEntity {
 
     @Id
     @GeneratedValue
     private Long id;
     private LocalDate collectionDate;
-    private Long collectedAmount;
-    private Long boundDebtId;
-    private Long userId;
+    @NumberFormat(pattern = "###.##")
+    private Double collectedAmount;
+    @OneToOne(orphanRemoval = true, fetch = FetchType.LAZY)
+    private Debt boundDebt;
+    @ManyToOne
+    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "FK_USER_COLLECTION"))
+    private User user;
 
 }

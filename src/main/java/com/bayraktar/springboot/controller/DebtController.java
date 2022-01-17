@@ -15,6 +15,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/debts")
 @RequiredArgsConstructor
+
 public class DebtController {
 
     private final DebtService debtService;

@@ -5,6 +5,7 @@ import com.bayraktar.springboot.entity.User;
 import com.bayraktar.springboot.enums.DebtType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.springframework.format.annotation.NumberFormat;
 
 import java.time.LocalDate;
 
@@ -14,12 +15,13 @@ import java.time.LocalDate;
 public class DebtGetDTO {
 
     private Long id;
-    private Long mainDebtAmount;
-    private Long totalDebtAmount;
+    private Double mainDebtAmount;
+    private Double totalDebtAmount;
     private LocalDate expiryDate;
     private LocalDate registrationDate;
     private Debt boundDebt;
     private DebtType debtType;
     private User user;
-    private transient Long interest;
+    @NumberFormat(pattern = "###.##")
+    private transient Double interest;
 }
